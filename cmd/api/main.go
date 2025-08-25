@@ -4,13 +4,8 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log/slog"
-	"net/http"
 	"os"
-	"time"
-
-	"github.com/julienschmidt/httprouter"
 )
 
 const version = "1.0.0"
@@ -40,34 +35,13 @@ func setupLogger() *slog.Logger {
 	return logger
 }
 
-func (app *application) routes() http.Handler {
-	router := httprouter.New()
-	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
 
-	return router
-}
 
-func (app *application) serve() error {
-	srv := &http.Server {
-		Addr: fmt.Sprintf(":%d", app.config.port),
-		Handler: app.routes(),
-		IdleTimeout: time.Minute,
-		ReadTimeout: 5 * time.Minute,
-		WriteTimeout: 10 * time.Second,
-		ErrorLog: slog.NewLogLogger(app.logger.Handler(), slog.LevelError),
-	}
-	app.logger.Info("Starting Server", "addr", srv.Addr, "env", app.config.env)
+// func (a *applicationDependencies) healthcheckHandler(w http.ResponseWriter, r *http.Request) {
+// 	data := map[string]string {
 
-	return srv.ListenAndServe()
-}
-
-func (app *application) healthcheckHandler(w http.ResponseWriter, r *http.Request) {
-	js := `{"status": "available", "environment": %q, "version": %q}`
-	js = fmt.Sprintf(js, app.config.env, version)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(js))
-}
+// 	}
+// }
 
 func main() {
 	// Initialize configuration
@@ -83,7 +57,7 @@ func main() {
 	}
 
 	// Run the app
-	err := app.serve()
+	err := app.Serve()
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
