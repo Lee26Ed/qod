@@ -35,14 +35,6 @@ func setupLogger() *slog.Logger {
 	return logger
 }
 
-
-
-// func (a *applicationDependencies) healthcheckHandler(w http.ResponseWriter, r *http.Request) {
-// 	data := map[string]string {
-
-// 	}
-// }
-
 func main() {
 	// Initialize configuration
 	cfg := loadConfig()
