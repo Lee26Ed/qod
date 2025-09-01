@@ -4,8 +4,11 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
+	"time"
 )
 
 const version = "1.0.0"
@@ -47,6 +50,19 @@ func main() {
 		config: cfg,
 		logger: logger,
 	}
+
+	router := http.NewServeMux()
+    router.HandleFunc("/v1/healthcheck", app.HealthcheckHandler)
+
+	apiServer := &http.Server {
+        Addr: fmt.Sprintf(":%d", cfg.port),
+        Handler: router,
+        IdleTimeout: time.Minute,
+        ReadTimeout: 5 * time.Second,
+        WriteTimeout: 10 * time.Second,
+        ErrorLog: slog.NewLogLogger(logger.Handler(), slog.LevelError),
+    }
+
 
 	// Run the app
 	err := app.Serve()
