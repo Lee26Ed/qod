@@ -51,12 +51,9 @@ func main() {
 		logger: logger,
 	}
 
-	router := http.NewServeMux()
-    router.HandleFunc("/v1/healthcheck", app.HealthcheckHandler)
-
 	apiServer := &http.Server {
         Addr: fmt.Sprintf(":%d", cfg.port),
-        Handler: router,
+		Handler: app.routes(),
         IdleTimeout: time.Minute,
         ReadTimeout: 5 * time.Second,
         WriteTimeout: 10 * time.Second,
@@ -65,7 +62,7 @@ func main() {
 
 
 	// Run the app
-	err := app.Serve()
+	err := apiServer.ListenAndServe()
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
