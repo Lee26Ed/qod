@@ -6,7 +6,7 @@ import (
 )
 
 // each name begins with uppercase so that they are exportable/public
-type Comment struct {
+type Quotes struct {
     ID int64                     // unique value for each comment
     Content  string              // the comment data
     Author  string               // the person who wrote the comment
