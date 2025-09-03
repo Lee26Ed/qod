@@ -33,8 +33,7 @@ func loadConfig() configuration {
 }
 
 func setupLogger() *slog.Logger {
-	var logger *slog.Logger 
-	logger = slog.New(slog.NewTextHandler(os.Stdout, nil))
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	return logger
 }
 
