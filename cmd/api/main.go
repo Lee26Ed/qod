@@ -35,7 +35,7 @@ func loadConfig() configuration {
 	flag.IntVar(&cfg.port, "port", 4000, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment(development|staging|production)")
 	// read in the dsn
-    flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://comments:fishsticks@localhost/comments",
+    flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://quotes:fishsticks@localhost/quotes",
                   "PostgreSQL DSN")
 	flag.Parse()
 
