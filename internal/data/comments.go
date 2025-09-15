@@ -157,3 +157,53 @@ func (q QuoteModel) Delete(id int64) error {
    return nil
 
 }
+
+// Get all comments
+func (q QuoteModel) GetAll() ([]*Quotes, error) {
+
+	// the SQL query to be executed against the database table
+    query := `
+        SELECT id, created_at, content, author, version
+        FROM quotes
+        ORDER BY id
+      `
+   ctx, cancel := context.WithTimeout(context.Background(), 3 * time.Second)
+   defer cancel()
+
+   // QueryContext returns multiple rows.
+	rows, err := q.DB.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	// clean up the memory that was used
+	defer rows.Close()
+	// we will store the address of each comment in our slice
+	quotes := []*Quotes{}
+
+	// process each row that is in rows
+
+	for rows.Next() {
+		var quote Quotes
+		err := rows.Scan(&quote.ID,
+						&quote.CreatedAt,
+						&quote.Content,
+						&quote.Author,
+						&quote.Version,
+						)
+		if err != nil {
+			return nil, err
+		}
+	// add the row to our slice
+	quotes = append(quotes, &quote)
+	}  // end of for loop
+
+	// after we exit the loop we need to check if it generated any errors
+	err = rows.Err()
+	if err != nil {
+	return nil, err
+	}
+
+	return quotes, nil
+
+}

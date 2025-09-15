@@ -12,7 +12,7 @@ import (
 	"github.com/Lee26Ed/qod/internal/validator"
 )
 
-func (a *application) createCommentHandler(w http.ResponseWriter,
+func (a *application) createQuoteHandler(w http.ResponseWriter,
                                                       r *http.Request) { 
     // create a struct to hold a comment
     // we use struct tags[``] to make the names display in lowercase
@@ -211,3 +211,22 @@ func (a *application)deleteQuoteHandler(
     }
 
 }
+
+func (a *application)listQuotesHandler(
+                                               w http.ResponseWriter,
+                                               r *http.Request) {
+
+	quotes, err := a.quoteModel.GetAll()
+	if err != nil {
+		a.serverErrorResponse(w, r, err)
+		return
+	}
+
+	data := envelope {
+		"quotes": quotes,
+	}
+	err = a.writeJSON(w, http.StatusOK, data, nil)
+	if err != nil {
+		a.serverErrorResponse(w, r, err)
+	}
+	}
