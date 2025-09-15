@@ -12,6 +12,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/Lee26Ed/qod/internal/data"
 	_ "github.com/lib/pq"
 )
 
@@ -27,6 +28,7 @@ type configuration struct {
 type application struct {
 	config configuration
 	logger *slog.Logger
+	quoteModel data.QuoteModel
 }
 
 func loadConfig() configuration {
@@ -93,6 +95,7 @@ func main() {
 	app := &application {
 		config: cfg,
 		logger: logger,
+		quoteModel: data.QuoteModel{DB: db},
 	}
 
 	apiServer := &http.Server {
