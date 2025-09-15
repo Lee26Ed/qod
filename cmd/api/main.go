@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/Lee26Ed/qod/internal/data"
@@ -23,6 +24,9 @@ type configuration struct {
 	db struct {
 		dsn string
 	}
+	cors struct {
+		trustedOrigins []string
+	}
 }
 
 type application struct {
@@ -30,6 +34,8 @@ type application struct {
 	logger *slog.Logger
 	quoteModel data.QuoteModel
 }
+
+
 
 func loadConfig() configuration {
 	var cfg configuration
@@ -39,6 +45,12 @@ func loadConfig() configuration {
 	// read in the dsn
     flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://quotes:fishsticks@localhost/quotes",
                   "PostgreSQL DSN")
+	flag.Func("cors-trusted-origins", "Trusted CORS origins (space separated)",
+              func(val string) error {
+                   cfg.cors.trustedOrigins = strings.Fields(val)
+                   return nil
+              })
+
 	flag.Parse()
 
 	return cfg
