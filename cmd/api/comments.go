@@ -4,7 +4,11 @@ package main
 import (
 	"fmt"
 	"net/http"
+
 	// import the data package which contains the definition for Comment
+
+	"github.com/Lee26Ed/qod/internal/data"
+	"github.com/Lee26Ed/qod/internal/validator"
 )
 
 func (a *application) createCommentHandler(w http.ResponseWriter,
@@ -22,6 +26,22 @@ func (a *application) createCommentHandler(w http.ResponseWriter,
 		a.badRequestResponse(w, r, err)
        return
    }
+
+   // Copy the values from incomingData to a new Comment struct
+	// At this point in our code the JSON is well-formed JSON so now
+	// we will validate it using the Validator which expects a Comment
+	quote := &data.Quotes {
+		Content: incomingData.Content,
+		Author: incomingData.Author,
+	}
+	// Initialize a Validator instance
+	v := validator.New()
+
+	data.ValidateComment(v, quote)
+	if !v.IsEmpty() {
+		a.failedValidationResponse(w, r, v.Errors)
+		return
+	}
 
 // for now display the result
    fmt.Fprintf(w, "%+v\n", incomingData)
