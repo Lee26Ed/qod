@@ -221,6 +221,7 @@ func (a *application)listQuotesHandler(
     var queryParametersData struct {
         Content string
         Author  string
+		data.Filters
     }
 
 	// get the query parameters from the URL
@@ -237,8 +238,26 @@ func (a *application)listQuotesHandler(
                                   "author",
                                   "") 
 
+    v := validator.New()
 
-	quotes, err := a.quoteModel.GetAll(queryParametersData.Content, queryParametersData.Author)
+	queryParametersData.Filters.Page = a.getSingleIntegerParameter(
+								  queryParameters,
+								  "page",
+								  1,
+								  v)
+	queryParametersData.Filters.PageSize = a.getSingleIntegerParameter(
+								  queryParameters,
+								  "page_size",
+								  20,
+								  v)
+
+	data.ValidateFilters(v, queryParametersData.Filters)
+	if !v.IsEmpty() {
+		a.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	quotes, err := a.quoteModel.GetAll(queryParametersData.Content, queryParametersData.Author, queryParametersData.Filters)
 	if err != nil {
 		a.serverErrorResponse(w, r, err)
 		return

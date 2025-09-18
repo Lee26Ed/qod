@@ -159,7 +159,7 @@ func (q QuoteModel) Delete(id int64) error {
 }
 
 // Get all comments
-func (q QuoteModel) GetAll(content string, author string) ([]*Quotes, error) {
+func (q QuoteModel) GetAll(content string, author string, filters Filters) ([]*Quotes, error) {
 
 	// the SQL query to be executed against the database table
     query := `
@@ -170,13 +170,14 @@ func (q QuoteModel) GetAll(content string, author string) ([]*Quotes, error) {
         AND (to_tsvector('simple', author) @@ 
              plainto_tsquery('simple', $2) OR $2 = '') 
         ORDER BY id  
+		LIMIT $3 OFFSET $4
      `
 
    ctx, cancel := context.WithTimeout(context.Background(), 3 * time.Second)
    defer cancel()
 
    // QueryContext returns multiple rows.
-	rows, err := q.DB.QueryContext(ctx, query, content, author)
+	rows, err := q.DB.QueryContext(ctx, query, content, author, filters.Limit(), filters.Offset())
 	if err != nil {
 		return nil, err
 	}
