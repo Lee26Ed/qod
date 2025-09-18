@@ -159,11 +159,11 @@ func (q QuoteModel) Delete(id int64) error {
 }
 
 // Get all comments
-func (q QuoteModel) GetAll(content string, author string, filters Filters) ([]*Quotes, error) {
+func (q QuoteModel) GetAll(content string, author string, filters Filters) ([]*Quotes, Metadata, error) {
 
 	// the SQL query to be executed against the database table
     query := `
-        SELECT id, created_at, content, author, version
+        SELECT COUNT(*) OVER(), id, created_at, content, author, version
         FROM quotes
         WHERE (to_tsvector('simple', content) @@
               plainto_tsquery('simple', $1) OR $1 = '') 
@@ -179,11 +179,12 @@ func (q QuoteModel) GetAll(content string, author string, filters Filters) ([]*Q
    // QueryContext returns multiple rows.
 	rows, err := q.DB.QueryContext(ctx, query, content, author, filters.Limit(), filters.Offset())
 	if err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
 
 	// clean up the memory that was used
 	defer rows.Close()
+	totalRecords := 0
 	// we will store the address of each comment in our slice
 	quotes := []*Quotes{}
 
@@ -191,14 +192,15 @@ func (q QuoteModel) GetAll(content string, author string, filters Filters) ([]*Q
 
 	for rows.Next() {
 		var quote Quotes
-		err := rows.Scan(&quote.ID,
+		err := rows.Scan(&totalRecords,
+						&quote.ID,
 						&quote.CreatedAt,
 						&quote.Content,
 						&quote.Author,
 						&quote.Version,
 						)
 		if err != nil {
-			return nil, err
+			return nil, Metadata{}, err
 		}
 	// add the row to our slice
 	quotes = append(quotes, &quote)
@@ -207,9 +209,11 @@ func (q QuoteModel) GetAll(content string, author string, filters Filters) ([]*Q
 	// after we exit the loop we need to check if it generated any errors
 	err = rows.Err()
 	if err != nil {
-	return nil, err
+		return nil, Metadata{}, err
 	}
 
-	return quotes, nil
+	metadata := CalculateMetadata(totalRecords, filters.Page, filters.PageSize)
+
+	return quotes, metadata, nil
 
 }
