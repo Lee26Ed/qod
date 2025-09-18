@@ -250,6 +250,12 @@ func (a *application)listQuotesHandler(
 								  "page_size",
 								  20,
 								  v)
+	queryParametersData.Filters.Sort = a.getSingleQueryParameter(
+								  queryParameters,
+								  "sort",
+								  "id")
+								  
+	queryParametersData.Filters.SortSafelist = []string{"id", "-id", "created_at", "-created_at", "author", "-author"}
 
 	data.ValidateFilters(v, queryParametersData.Filters)
 	if !v.IsEmpty() {
@@ -265,7 +271,7 @@ func (a *application)listQuotesHandler(
 
 	data := envelope {
 		"quotes": quotes,
-		"metadata": metadata,
+		"@metadata": metadata,
 	}
 	err = a.writeJSON(w, http.StatusOK, data, nil)
 	if err != nil {

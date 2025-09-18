@@ -1,10 +1,16 @@
 package data
 
-import "github.com/Lee26Ed/qod/internal/validator"
+import (
+	"strings"
+
+	"github.com/Lee26Ed/qod/internal/validator"
+)
 
 type Filters struct {
 	Page      int
 	PageSize  int
+	Sort      string
+	SortSafelist []string
 }
 
 func ValidateFilters(v *validator.Validator, f Filters) {
@@ -12,7 +18,7 @@ func ValidateFilters(v *validator.Validator, f Filters) {
 	v.Check(f.Page <= 500, "page", "must not be more than 500")
 	v.Check(f.PageSize > 0, "page_size", "must be greater than zero")
 	v.Check(f.PageSize <= 100, "page_size", "must not be more than 100")
-
+	v.Check(validator.PermittedValue(f.Sort, f.SortSafelist...), "sort", "invalid sort value")
 }
 
 func (f Filters) Limit() int {
@@ -45,4 +51,20 @@ func CalculateMetadata(totalRecords int, currentPage int, pageSize int) Metadata
 		LastPage:     lastPage,
 		TotalRecords: totalRecords,
 	}
+}
+
+func (f Filters) SortColumn() string {
+	for _, safeValue := range f.SortSafelist {
+		if f.Sort == safeValue {
+			return strings.TrimPrefix(f.Sort, "-")
+		}
+	}
+	panic("unsafe sort parameter: " + f.Sort)
+}
+
+func (f Filters) SortDirection() string {
+	if strings.HasPrefix(f.Sort, "-") {
+		return "DESC"
+	}
+	return "ASC"
 }
