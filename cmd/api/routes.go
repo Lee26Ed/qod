@@ -25,6 +25,7 @@ func (a *application) routes() http.Handler {
 	// wrap router with middleware
     handler := a.recoverPanic(router) // your existing middleware
     handler = a.enableCORS(handler)  
+	handler = a.rateLimit(handler)
 
 	   return handler
 }

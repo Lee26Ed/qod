@@ -28,6 +28,11 @@ type configuration struct {
 	cors struct {
 		trustedOrigins []string
 	}
+	limiter struct {
+		rps float64
+		burst int
+		enabled bool
+	}
 }
 
 type application struct {
@@ -51,6 +56,15 @@ func loadConfig() configuration {
                    cfg.cors.trustedOrigins = strings.Fields(val)
                    return nil
               })
+	flag.Float64Var(&cfg.limiter.rps, "limiter-rps", 2,
+                  "Rate Limiter maximum requests per second")
+
+    flag.IntVar(&cfg.limiter.burst, "limiter-burst", 5,
+                  "Rate Limiter maximum burst")
+
+    flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true,
+                  "Enable rate limiter")
+
 
 	flag.Parse()
 

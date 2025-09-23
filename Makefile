@@ -6,6 +6,10 @@ run/api:
 	@echo '--Running application--'
 	@go run ./cmd/api --port=4000 --env=development --db-dsn=${QUOTES_DB_DSN} \
 	-cors-trusted-origins="http://localhost:9000 http://localhost:9001"
+	-limiter-burst=5
+	-limiter-rps=2
+	-limiter-enabled=true
+
 
 ## db/psql: connect to the database using psql (terminal)
 .PHONY: db/psql
