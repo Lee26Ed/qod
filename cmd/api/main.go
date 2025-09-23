@@ -7,9 +7,7 @@ import (
 	"context"
 	"database/sql"
 	"flag"
-	"fmt"
 	"log/slog"
-	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -125,20 +123,11 @@ func main() {
 		quoteModel: data.QuoteModel{DB: db},
 	}
 
-	apiServer := &http.Server {
-        Addr: fmt.Sprintf(":%d", cfg.port),
-		Handler: app.routes(),
-        IdleTimeout: time.Minute,
-        ReadTimeout: 5 * time.Second,
-        WriteTimeout: 10 * time.Second,
-        ErrorLog: slog.NewLogLogger(logger.Handler(), slog.LevelError),
-    }
-
-	logger.Info("starting server", "address", apiServer.Addr,
-                "environment", cfg.env)
-    err = apiServer.ListenAndServe()   // remove the :
-    logger.Error(err.Error())
-    os.Exit(1)
+	err = app.Serve()
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
 }
 
 func printUB() string {
